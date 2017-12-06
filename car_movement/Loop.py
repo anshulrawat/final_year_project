@@ -1,20 +1,32 @@
 from Car import*
-
-vehicle = Car()
+from random import *
+vehicle =[]
+vehicle.append(Car(100,200))
+vehicle.append(Car(300,500))
+vehicle.append(Car(600,300))
 blue = (0,0,255)
 
 
-def display_all(main_surface, display_list, text_list):
+def display_all(main_surface, display_list):
     main_surface.fill((0, 100, 100))
     pygame.draw.rect(main_s, blue, (200, 150, 100, 50))
     for element in display_list:
-       element.display(main_surface)
+        element.display(main_surface)
     #for element_val in range(0, len(text_list)):
      #   main_surface.blit(font.render(str(text_list[element_val]), True, (0, 255, 0)), (10, 10 + (10 * element_val)))
 
 
 def update_all(update_list):
     for element in update_list:
+        key = randint(0, 3)
+        if key == 0:
+            element.left = True
+        if key == 1:
+            element.right = True
+        if key == 2:
+            element.forward = True
+        if key == 3:
+            element.backward = True
         element.update()
 
 
@@ -28,32 +40,7 @@ while running:
         if event.type == pygame.KEYDOWN:
             None
 
-    key = pygame.key.get_pressed()
-    if key[pygame.K_LEFT]:
-        vehicle.left = True
-    if key[pygame.K_RIGHT]:
-        vehicle.right = True
-    if key[pygame.K_UP]:
-        vehicle.forward = True
-    if key[pygame.K_DOWN]:
-        vehicle.backward = True
-    if key[pygame.K_r]:
-        vehicle.rect.x = 500
-        vehicle.rect.y = 300
-        vehicle.angle = 0
-
-    to_update = [vehicle]
-    to_display = [vehicle]
-    to_text = [clock.get_fps(),
-               vehicle.angle,
-               vehicle.current_speed,
-               vehicle.move_x,
-               vehicle.move_y,
-               "F " + str(vehicle.forward),
-               "L " + str(vehicle.left),
-               "R " + str(vehicle.right)]
-
-    update_all(to_update)
-    display_all(main_s, to_display, to_text)
+    update_all(vehicle)
+    display_all(main_s, vehicle)
     pygame.display.flip()
 
