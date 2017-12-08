@@ -1,15 +1,16 @@
 from Car import*
 from random import *
 vehicle =[]
-vehicle.append(Car(100,200))
-vehicle.append(Car(300,500))
-vehicle.append(Car(600,300))
+#vehicle.append(Car(100,200))
+#vehicle.append(Car(300,500))
+vehicle.append(Car(300,600))
 blue = (0,0,255)
 
 
 def display_all(main_surface, display_list):
     main_surface.fill((0, 100, 100))
     pygame.draw.rect(main_s, blue, (200, 150, 100, 50))
+    pygame.draw.rect(main_s, blue, (400, 350, 100, 50))
     for element in display_list:
         element.display(main_surface)
     #for element_val in range(0, len(text_list)):

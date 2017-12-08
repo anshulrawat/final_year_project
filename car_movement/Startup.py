@@ -13,3 +13,5 @@ main_s = pygame.display.set_mode((width, height))
 
 def deg_to_rad(degrees):
     return degrees / 180.0 * math.pi
+def rad_to_deg(radians):
+    return radians *180.0/ math.pi
