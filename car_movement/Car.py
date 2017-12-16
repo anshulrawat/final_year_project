@@ -2,6 +2,8 @@ from Startup import*
 surface= (0,100,100)
 red = (255,0,0)
 car = (68,68,68)
+
+
 class Car:
     def __init__(self,pos_x=width/2,pos_y=height/2):
         self.body = pygame.image.load("Images//Body//Grey.png")
@@ -43,25 +45,37 @@ class Car:
             return 1
         else:
             return -1
-    def find_dis(self,main_surface,x1,y1,m,z,f):
+    def find_dis(self,main_surface,x1,y1,alpha):
         c_x=1000
+        if((alpha>=315 and alpha<=360) or (alpha>=0 and alpha<=45)):
+            t1=1.0
+            t2=math.tan(deg_to_rad(alpha))
+        elif((alpha>=45 and alpha<=135)):
+            t2=1.0
+            t1=-math.tan(deg_to_rad(alpha-90))
+        elif((alpha >= 135 and alpha <= 225)):
+            t1=-1.0
+            t2=-math.tan(deg_to_rad(alpha-180))
+        else:
+            t2=-1.0
+            t1 = math.tan(deg_to_rad(alpha - 270))
         for t in range(int(self.rect.w + 1), int(c_x)):
-            if(m>-2 and m<2):
-                x=x1+f*t
-                y=y1-f*m*t
-            else:
-                y=y1-t
-                x=x1+t/m
+            x=x1+t*t1
+            y=y1-t*t2
+
             if (x > 0 and x < 1000 and y > 0 and y < 600):
                 if (main_surface.get_at((int(x), int(y))) != surface and main_surface.get_at((int(x), int(y))) != red):
                     return math.sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1))
-        return 10000
+            else:
+                return math.sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1))
+            pygame.draw.circle(main_surface, (255, 0, 0), (int(x), int(y)), 1, 1)
 
-    def car_angle(self,p1,p2):
-        if((p2[0]-p1[0])!=0):
-            return math.atan((p2[1]-p1[1])/(p2[0]-p1[0]))
-        else:
-            return 90
+
+
+        return 10000
+    def angle_cal(self,theta):
+        return (360+theta)%360
+
     def reset_data(self):
         self.left = False
         self.right = False
@@ -152,20 +166,21 @@ class Car:
         point_y = int(temp_rect.center[1] - float(26 * math.sin(angle_rad)))
         self.p2=(point_x,point_y)
         pygame.draw.circle(main_surface, (255, 0, 0), self.p2, 3, 2)
-        slope= self.car_angle(self.p1,self.p2)
-        slope=rad_to_deg(slope)
-        #print("car_angle",slope)
-        pygame.draw.rect(main_surface,(0,255,0),temp_rect,3)
-        f=self.check_slope(math.tan(deg_to_rad(10-slope)))
-        print("0 degree dis: ",self.find_dis(main_surface, self.p2[0]-self.ww, self.p2[1], math.tan(deg_to_rad(10-slope)), 1000,f))
-        f = self.check_slope(math.tan(deg_to_rad(55 - slope)))
-        print("45 degree dis: ", self.find_dis(main_surface, self.p2[0]-self.ww, self.p2[1], math.tan(deg_to_rad(55-slope)), 1000,f))
-        f = self.check_slope(math.tan(deg_to_rad(95 - slope)))
-        print("90 degree dis: ",self.find_dis(main_surface, self.p2[0] - self.ww, self.p2[1], math.tan(deg_to_rad(90.1-slope)), 1000, f))
-        f = self.check_slope(math.tan(deg_to_rad(135 - slope)))
-        print("135 degree dis: ", self.find_dis(main_surface,  self.p2[0]-self.ww,self.p2[1], math.tan(deg_to_rad(135-slope)), 1000,f))
-        f = self.check_slope(math.tan(deg_to_rad(180 - slope)))
-        print("180 degree dis: ", self.find_dis(main_surface, self.p2[0]-self.ww, self.p2[1], math.tan(deg_to_rad(180-slope)), 1000,f))
+
+       # pygame.draw.rect(main_surface,(0,255,0),temp_rect,3)
+        #print("#",self.angle)
+
+        f=1
+        #f=self.check_slope(math.tan(deg_to_rad(10-slope)))
+        print("0 degree dis: ",self.find_dis(main_surface, self.rect.x,self.rect.y,self.angle_cal(self.angle)))
+        #f = self.check_slope(math.tan(deg_to_rad(55 - slope)))
+        print("45 degree dis: ", self.find_dis(main_surface, self.rect.x,self.rect.y,self.angle_cal(self.angle+45)))
+        #f = self.check_slope(math.tan(deg_to_rad(95 - slope)))
+        print("90 degree dis: ",self.find_dis(main_surface,  self.rect.x,self.rect.y, self.angle_cal(self.angle+90)))
+        #f = self.check_slope(math.tan(deg_to_rad(135 - slope)))
+        print("135 degree dis: ", self.find_dis(main_surface,   self.rect.x,self.rect.y, self.angle_cal(self.angle+135)))
+        #f = self.check_slope(math.tan(deg_to_rad(180 - slope)))
+        print("180 degree dis: ", self.find_dis(main_surface,  self.rect.x,self.rect.y,self.angle_cal(self.angle+180)))
 
     def update(self):
         self.move_x = 0
