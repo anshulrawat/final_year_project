@@ -6,8 +6,8 @@ clock = pygame.time.Clock()
 font = pygame.font.SysFont("", 20)
 
 pygame.init()
-width = 1200
-height = 600
+width = 1400
+height = 700
 main_s = pygame.display.set_mode((width, height))
 
 

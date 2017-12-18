@@ -3,14 +3,20 @@ from random import *
 vehicle =[]
 #vehicle.append(Car(100,200))
 #vehicle.append(Car(300,500))
-vehicle.append(Car(300,600))
+vehicle.append(Car(300,700))
 blue = (0,0,255)
-
+black = (0,0,0)
 
 def display_all(main_surface, display_list):
-    main_surface.fill((0, 100, 100))
-    pygame.draw.rect(main_s, blue, (200, 150, 100, 50))
-    pygame.draw.rect(main_s, blue, (400, 350, 100, 50))
+    main_surface.fill((255, 255, 255))
+    #pygame.draw.rect(main_surface, blue, (200, 150, 100, 50))
+    #pygame.draw.rect(main_surface, blue, (600, 350, 100, 50))
+    pygame.draw.line(main_surface,black ,(1000,0),(1000,700), 2)
+    for i in range(0,4):
+        pygame.draw.rect(main_surface, green, (50,50+i*170,80,80))
+    for i in range(0,4):
+        pygame.draw.rect(main_surface, blue, (900,50+i*170,80,80))
+
     for element in display_list:
         element.display(main_surface)
     #for element_val in range(0, len(text_list)):
