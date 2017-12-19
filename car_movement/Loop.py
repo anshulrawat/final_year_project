@@ -6,7 +6,9 @@ vehicle =[]
 vehicle.append(Car(300,700))
 blue = (0,0,255)
 black = (0,0,0)
-
+def check_all(check_list):
+    for element in check_list:
+        element.check()
 def display_all(main_surface, display_list):
     main_surface.fill((255, 255, 255))
     #pygame.draw.rect(main_surface, blue, (200, 150, 100, 50))
@@ -25,7 +27,7 @@ def display_all(main_surface, display_list):
 
 def update_all(update_list):
     for element in update_list:
-        key = randint(0, 3)
+       """" key = randint(0, 3)
         if key == 0:
             element.left = True
         if key == 1:
@@ -36,6 +38,22 @@ def update_all(update_list):
             element.backward = True
         element.update()
 
+"""
+
+    key = pygame.key.get_pressed()
+    if key[pygame.K_LEFT]:
+        element.left = True
+    if key[pygame.K_RIGHT]:
+        element.right = True
+    if key[pygame.K_UP]:
+        element.forward = True
+    if key[pygame.K_DOWN]:
+        element.backward = True
+    if key[pygame.K_r]:
+        element.rect.x = 500
+        element.rect.y = 300
+        element.angle = 0
+    element.update()
 
 running = True
 while running:
@@ -48,6 +66,7 @@ while running:
             None
 
     update_all(vehicle)
+    check_all(vehicle)
     display_all(main_s, vehicle)
     pygame.display.flip()
 
