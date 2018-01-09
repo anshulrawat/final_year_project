@@ -2,14 +2,12 @@ from Startup import*
 from random import *
 black = (0,0,0)
 surface= (255,255,255)
+grey= (86,86,86)
 red = (255,0,0)
 yellow = (204,204,0)
 car = (68,68,68)
 green=(0,255,0)
-def coordinate():
-    xn= randint(0, 1000)
-    yn = randint(0, 700)
-    return xn,yn
+
 def distfromline(a,b,c,x1,y1):
     return abs(a*x1+b*y1+c)/math.sqrt(a*a + b*b)
 def equation_cal(x1,y1,x2,y2):
@@ -37,7 +35,7 @@ def drawlabels():
 
 class Car:
     def __init__(self,pos_x=width/2,pos_y=height/2):
-        self.body = pygame.image.load("Images//Body//Grey.png")
+        self.body = pygame.image.load("Images//Body//car.png")
         self.wheels = pygame.image.load("Images//Wheels//Black.png")
         self.rect = self.body.get_rect()
         self.rect.x = pos_x
@@ -65,20 +63,14 @@ class Car:
         self.move_y = 0
         self.p1=(0,0)
         self.p2=(0,0)
+        self.d1,self.d2,self.d3,self.d4,self.d5=(10,10,10,10,10)
         #self.p3=(0,0)
         #self.p4=(0,0)
-    def is_collision(self):
-        if(self.p1[0]+self.move_x <= 0 or self.p1[0]+self.move_x >= 1000 or self.p1[1]+self.move_y <= 0 or self.p1[1]+self.move_y >= 700):
-            return False
-        if(self.p2[0]+self.move_x <= 0 or self.p2[0]+self.move_x >= 1000 or self.p2[1]+self.move_y <= 0 or self.p2[1]+self.move_y >= 700):
+    def is_collision(self,main_surface):
+        if(self.d2<30 or self.d3<=30 or self.d4<=30):
             return False
         else:
             return True
-    def check_slope(self,x):
-        if(x>=0):
-            return 1
-        else:
-            return -1
     def find_dis(self,main_surface,x1,y1,alpha):
         c_x=1000
         if((alpha>=315 and alpha<=360) or (alpha>=0 and alpha<=45)):
@@ -93,13 +85,13 @@ class Car:
         else:
             t2=-1.0
             t1 = math.tan(deg_to_rad(alpha - 270))
-        for t in range(int(self.rect.w + 1), int(c_x)):
+        for t in range(int(self.rect.w/math.sqrt(2)+1), int(c_x)):
             x=x1+t*t1
             y=y1-t*t2
             factor_x = int(2*t1)
             factor_y = int(2*t2)
             if (x > 2 and x < 998 and y >2 and y < 692):
-                if (main_surface.get_at((int(x)+factor_x, int(y)+factor_y)) == black ):
+                if (main_surface.get_at((int(x)+factor_x, int(y)+factor_y)) == black or main_surface.get_at((int(x)+factor_x, int(y)+factor_y)) == grey ):
                     return math.sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1))
             else:
                 return math.sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1))
@@ -163,15 +155,17 @@ class Car:
             final_y = (float(self.ww *(self.current_speed+1)* math.cos(angle_rad)))
             self.move_x = init_x-final_x
             self.move_y = init_y-final_y
-            if (self.is_collision()):
+            if (self.is_collision(main_s)):
                 self.rect.x += self.move_x
                 self.rect.y += self.move_y
                 self.angle+=self.turn_angle
+            else:
+                self.angle += self.turn_angle
         else:
             angle_rad = deg_to_rad(self.angle)
             self.move_x = -(float(self.current_speed * math.sin(angle_rad)))
             self.move_y = -(float(self.current_speed * math.cos(angle_rad)))
-            if (self.is_collision()):
+            if (self.is_collision(main_s)):
                 self.rect.x += self.move_x
                 self.rect.y += self.move_y
 
@@ -193,15 +187,15 @@ class Car:
         temp_rect = temp_image.get_rect()
         main_surface.blit(temp_image, (self.rect.x-temp_rect.w/2, self.rect.y-temp_rect.h/2))
         temp_image = pygame.transform.rotate(self.wheels, self.angle)
-        main_surface.blit(temp_image, (self.rect.x-temp_rect.w/2, self.rect.y-temp_rect.h/2))
+        #main_surface.blit(temp_image, (self.rect.x-temp_rect.w/2, self.rect.y-temp_rect.h/2))
 
         temp_rect.x=self.rect.x-temp_rect.w/2
         temp_rect.y=self.rect.y-temp_rect.h/2
         angle_rad = deg_to_rad(self.angle+90+30)
         point_x=int(temp_rect.center[0] +float(26 * math.cos(angle_rad)))
-        point_y = int(temp_rect.center[1] - float(26 * math.sin(angle_rad)))
+        point_y = int(temp_rect.center[1] - float(20 * math.sin(angle_rad)))
         self.p1=(point_x,point_y)
-        pygame.draw.circle(main_surface, (255, 0, 0 ), self.p1, 3, 2)
+        #pygame.draw.circle(main_surface, (255, 0, 0 ), self.p1, 3, 2)
         angle_rad = deg_to_rad(self.angle+90)
         init_x = (int(self.ww * math.sin(angle_rad)))
         init_y = (int(self.ww * math.cos(angle_rad)))
@@ -212,30 +206,29 @@ class Car:
         pygame.draw.circle(main_surface, (255, 0, 0), (self.rect.x+init_x, self.rect.y+init_y), 3, 2)
         angle_rad = deg_to_rad(self.angle+90-30)
         point_x=int(temp_rect.center[0] +float(26 * math.cos(angle_rad)))
-        point_y = int(temp_rect.center[1] - float(26 * math.sin(angle_rad)))
+        point_y = int(temp_rect.center[1] - float(20 * math.sin(angle_rad)))
         self.p2=(point_x,point_y)
-        pygame.draw.circle(main_surface, (255, 0, 0), self.p2, 3, 2)
+        #pygame.draw.circle(main_surface, (255, 0, 0), self.p2, 3, 2)
+
 
        # pygame.draw.rect(main_surface,(0,255,0),temp_rect,3)
         #print("#",self.angle)
 
-        f=1
-        #f=self.check_slope(math.tan(deg_to_rad(10-slope)))
+
         x1 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle))
+        self.d1 =x1
         #print("0 degree dis: ",x1)
-        #f = self.check_slope(math.tan(deg_to_rad(55 - slope)))
-
         x2 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle + 45))
+        self.d2 = x2
         #print("45 degree dis: ", x2)
-        #f = self.check_slope(math.tan(deg_to_rad(95 - slope)))
-
         x3 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle + 90))
+        self.d3 = x3
         #print("90 degree dis: ",x3 )
-        #f = self.check_slope(math.tan(deg_to_rad(135 - slope)))
         x4 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle + 135))
+        self.d4 = x4
         #print("135 degree dis: ",x4 )
-        #f = self.check_slope(math.tan(deg_to_rad(180 - slope)))
         x5 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle + 180))
+        self.d5 = x5
         #print("180 degree dis: ", x5)
         pygame.draw.rect(main_surface, (255,100,50), (1060, 220 - int(self.current_speed * 50), 30, int(self.current_speed * 50)))
         pygame.draw.rect(main_surface, yellow, (1160+60, 220-int(x1/5), 20, int(x1/5)))
