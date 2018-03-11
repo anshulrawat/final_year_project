@@ -27,7 +27,7 @@ def display_all(main_surface, display_list):
 
 def update_all(update_list):
     for element in update_list:
-       """" key = randint(0, 3)
+        key = randint(0, 2)
         if key == 0:
             element.left = True
         if key == 1:
@@ -54,7 +54,7 @@ def update_all(update_list):
         element.rect.y = 300
         element.angle = 0
     element.update()
-
+"""
 running = True
 while running:
     clock.tick(60)
@@ -67,6 +67,6 @@ while running:
 
     update_all(vehicle)
     check_all(vehicle)
-    display_all(main_s, vehicle)
+    #display_all(main_s, vehicle)
     pygame.display.flip()
 

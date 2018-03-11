@@ -1,4 +1,5 @@
 from Startup import*
+
 from random import *
 black = (0,0,0)
 surface= (255,255,255)
@@ -7,6 +8,16 @@ red = (255,0,0)
 yellow = (204,204,0)
 car = (68,68,68)
 green=(0,255,0)
+blue = (0,0,255)
+sensor_limit =400
+
+def sum_readings(readings):
+    """Sum the number of non-zero readings."""
+    tot = 0
+    for i in readings:
+        tot += i
+    return tot
+
 
 def distfromline(a,b,c,x1,y1):
     return abs(a*x1+b*y1+c)/math.sqrt(a*a + b*b)
@@ -55,7 +66,7 @@ class Car:
         self.angle = 0
         self.turn_angle=0
         self.turn_speed = 5
-        self.top_speed = 4
+        self.top_speed = 3
         self.acceleration = 0.2
         self.deceleration = 0.2
         self.current_speed = 0.0
@@ -64,6 +75,7 @@ class Car:
         self.p1=(0,0)
         self.p2=(0,0)
         self.d1,self.d2,self.d3,self.d4,self.d5=(10,10,10,10,10)
+        self.collide = False
         #self.p3=(0,0)
         #self.p4=(0,0)
     def is_collision(self,main_surface):
@@ -108,6 +120,7 @@ class Car:
         self.right = False
         self.forward = False
         self.backward = False
+        self.collide= False
 
     def rotate(self):
         if self.angle > 360:
@@ -160,7 +173,9 @@ class Car:
                 self.rect.y += self.move_y
                 self.angle+=self.turn_angle
             else:
-                self.angle += self.turn_angle
+                self.collide=True
+                self.angle += self.turn_angle+75
+
         else:
             angle_rad = deg_to_rad(self.angle)
             self.move_x = -(float(self.current_speed * math.sin(angle_rad)))
@@ -168,9 +183,23 @@ class Car:
             if (self.is_collision(main_s)):
                 self.rect.x += self.move_x
                 self.rect.y += self.move_y
+            else:
+                self.collide=True
+                self.angle +=  75
 
     def display(self, main_surface):
+        main_surface.fill((255, 255, 255))
+        # pygame.draw.rect(main_surface, blue, (200, 150, 100, 50))
+        # pygame.draw.rect(main_surface, blue, (600, 350, 100, 50))
+        pygame.draw.line(main_surface, black, (1000, 0), (1000, 700), 2)
+        """for i in range(0, 4):
+            pygame.draw.rect(main_surface, green, (50, 50 + i * 170, 80, 80))
+        for i in range(0, 4):
+            pygame.draw.rect(main_surface, blue, (900, 50 + i * 170, 80, 80))
+        """
 
+        for i in range(0, 10):
+            pygame.draw.circle(main_surface, black, (obsx[i],obsy[i]), 20, 0)
         if (self.source != -1):
             pygame.draw.rect(main_s, red, (900, 50 + self.source * 170, 80, 80))
         if (self.destination != -1):
@@ -215,19 +244,19 @@ class Car:
         #print("#",self.angle)
 
 
-        x1 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle))
+        x1 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle+30))
         self.d1 =x1
         #print("0 degree dis: ",x1)
-        x2 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle + 45))
+        x2 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle + 60))
         self.d2 = x2
         #print("45 degree dis: ", x2)
         x3 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle + 90))
         self.d3 = x3
         #print("90 degree dis: ",x3 )
-        x4 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle + 135))
+        x4 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle + 120))
         self.d4 = x4
         #print("135 degree dis: ",x4 )
-        x5 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle + 180))
+        x5 = self.find_dis(main_surface, self.rect.x, self.rect.y, self.angle_cal(self.angle + 150))
         self.d5 = x5
         #print("180 degree dis: ", x5)
         pygame.draw.rect(main_surface, (255,100,50), (1060, 220 - int(self.current_speed * 50), 30, int(self.current_speed * 50)))
@@ -253,13 +282,44 @@ class Car:
             self.source=-1
             self.destination=-1
 
+    def learningval(self):
+        readings = [self.d1,self.d2,self.d3,self.d4,self.d5]
+        for i in range(5):
+            if readings[i] > 400:
+                readings[i] = 40
+            else:
+                readings[i]=int(readings[i]/10)
+        normalized_readings = [(x - 20.0) / 20.0 for x in readings]
+        state = np.array([normalized_readings])
+        reward =0
+        # Set the reward.
+        # Car crashed when any reading == 1
+        if self.collide:
+            reward = -500
+        else:
+            reward = -5 + int(sum_readings(readings) / 10)
 
 
+        return reward, state
 
-    def update(self):
+    def update(self,action=2):
         self.move_x = 0
         self.move_y = 0
         self.turn_angle=0
         #self.rotate()
+        if action == 0:
+            self.left = True
+        if action == 1:
+            self.right = True
+        if action == 2:
+            self.forward = True
+        if action == 3:
+            self.forward = True
         self.move()
+
+        self.display(main_s)
+        reward,state = self.learningval()
         self.reset_data()
+        return reward,state
+
+
